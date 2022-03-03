@@ -1,0 +1,1 @@
+# A repository for LNU educational practice tasks
