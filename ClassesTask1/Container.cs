@@ -16,15 +16,33 @@ namespace LNUCSharp.Task1
                 throw new FileLoadException("File either has not content or it is in the wrong format");
 
             Type valType = typeof(TVal);
-            var keyProps = Helpers.GetKeyProperties(valType);
 
             foreach (var entry in data)
             {
-                var instance = (TVal?)Activator.CreateInstance(valType, new object[] { entry });
-                var key = (TKey?)Helpers.GetPrimaryKey(instance);
-                this.Add(
-                    key!,
-                    instance!);
+                var instance = (TVal?)Activator.CreateInstance(valType);
+                var errors = Helpers.ParseData(ref instance, entry, Helpers.GetKeys(instance!.GetType()));
+                var pkey = (TKey)Helpers.GetPrimaryKey(instance);
+
+				var errorsProp = typeof(TVal).GetProperty("Errors");
+
+				if (errorsProp != null)
+				{
+					foreach (var err in errors)
+					{
+						typeof(TVal)!.GetMethod("AddError")!.Invoke(instance, new object[] { err.Key, err.Value });
+					}
+				}
+
+                try
+                {
+                    this.Add(
+                        pkey!,
+                        instance!);
+                }
+                catch (System.ArgumentException)
+                {
+					Console.WriteLine("Object with such ID is already present in the collection");
+                }
             }
         }
 
@@ -33,12 +51,7 @@ namespace LNUCSharp.Task1
             var dictList = new List<Dictionary<string, string>>();
             foreach (var entry in this.Values)
             {
-                var toDictMtd = typeof(TVal).GetMethod("ToDictionary");
-
-                if (toDictMtd is null)
-                    continue;
-                
-                var dictRepr = (Dictionary<string, string>?)toDictMtd.Invoke(entry, new object[] {});
+				Dictionary<string, string> dictRepr = Helpers.ToDictionary(entry, Helpers.GetKeys(entry!.GetType()));
 
                 if (dictRepr is null)
                     continue;
@@ -52,11 +65,22 @@ namespace LNUCSharp.Task1
 
         public void InputData()
         {
-            Type valType = typeof(TVal);
-            var keyProps = Helpers.GetKeyProperties(valType);
-            Dictionary<string, string> inputData = Helpers.InputTypeProperties(valType, keyProps);
-            var instance = (TVal?)Activator.CreateInstance(typeof(TVal), new object[] { inputData });
+            Dictionary<string, string> inputData = Helpers.InputTypeProperties(
+                typeof(TVal), Helpers.GetKeys(typeof(TVal)));
+            var instance = (TVal?)Activator.CreateInstance(typeof(TVal));
+			var errors = Helpers.ParseData(ref instance, inputData, Helpers.GetKeys(typeof(TVal)));
             var key = (TKey?)Helpers.GetPrimaryKey(instance);
+
+			var errorsProp = typeof(TVal).GetProperty("Errors");
+
+			if (errorsProp != null)
+			{
+				foreach (var err in errors)
+				{
+					typeof(TVal)!.GetMethod("AddError")!.Invoke(instance, new object[] { err.Key, err.Value });
+				}
+			}
+
 
             this.Add(
                 key!,
@@ -65,22 +89,26 @@ namespace LNUCSharp.Task1
 
         public void EditEntry(TKey ID, Dictionary<string, string> data)
         {
-            TVal? entry;
+            TVal? instance;
             Type tVal = typeof(TVal);
-            this.TryGetValue(ID, out entry);
-            var parseMethod = tVal.GetMethod("ParseData");
+            this.TryGetValue(ID, out instance);
 
-            if (entry is null)
+            if (instance is null)
             {
                 Console.WriteLine("Object with given key was not found");
                 return;
             }
-            if (parseMethod is null)
-            {
-                Console.WriteLine("Given object has not 'ParseData' method");
-                return;
-            }
-            parseMethod.Invoke(entry, new object[] { data, true });
+            var errors = Helpers.ParseData(ref instance, data, Helpers.GetKeys(tVal), true);
+
+			var errorsProp = typeof(TVal).GetProperty("Errors");
+
+			if (errorsProp != null)
+			{
+				foreach (var err in errors)
+				{
+					typeof(TVal)!.GetMethod("AddError")!.Invoke(instance, new object[] { err.Key, err.Value });
+				}
+			}
         }
 
         public List<TVal> Search(string searchQuery)
@@ -103,7 +131,7 @@ namespace LNUCSharp.Task1
         {
             var values = this.Values;
             var orderedEnumerable = values.OrderBy(
-                x => 
+                x =>
                 {
                     var prop = x!.GetType().GetProperty(propertyName);
                     if (prop == null)
