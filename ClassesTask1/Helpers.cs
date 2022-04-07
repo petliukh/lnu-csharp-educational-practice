@@ -5,23 +5,23 @@ namespace LNUCSharp.Task1
 {
     class Helpers
     {
-        public static object? ParseFromString(Type type, string to_parse)
+        public static object? ParseFromString(Type type, string toParse)
         {
             if (type == typeof(string))
             {
-                return to_parse;
+                return toParse;
             }
-            else if (type == typeof(int?))
+            else if (type == typeof(int) || type == typeof(int?))
             {
                 int value;
-                if (!int.TryParse(to_parse, out value))
+                if (!int.TryParse(toParse, out value))
                     return null;
                 return value;
             }
-            else if (type == typeof(DateOnly?))
+            else if (type == typeof(DateOnly) || type == typeof(DateOnly?))
             {
                 DateOnly value;
-                if (!DateOnly.TryParse(to_parse, out value))
+                if (!DateOnly.TryParse(toParse, out value))
                     return null;
                 return value;
             }
@@ -31,17 +31,79 @@ namespace LNUCSharp.Task1
             }
         }
 
+		public static Dictionary<string, string> ParseData<T>(
+            ref T instance,
+            Dictionary<string, string> data, 
+			List<string> keys,
+            bool partialEdit = false)
+        {
+			Dictionary<string, string> errors = new Dictionary<string, string>();
+
+            foreach (string key in keys)
+            {
+                PropertyInfo? p = instance!.GetType()!.GetProperty(key);
+
+                if (p == null)
+                    continue;
+
+                string? inputValue;
+                data.TryGetValue(p.Name, out inputValue);
+
+                if (inputValue == null)
+                {
+                    if (!partialEdit)
+                        errors.Add(
+                            p.Name,
+                            "Read error. No data provided for the field");
+                    continue;
+                }
+
+                object? parsedData = Helpers.ParseFromString(p.PropertyType, inputValue);
+                
+                if (parsedData == null)
+                {
+                    errors.Add(
+                        p.Name,
+                        String.Format(
+                            "Parsing error. Input string does not respresent a {0} type", 
+                            p.PropertyType.ToString()));
+                    continue;
+                }
+                p.SetValue(
+                    instance, 
+                    parsedData);
+            }
+			return errors;
+        }
+		
+        public static Dictionary<string, string> ToDictionary<T>(T instance, List<string> keys)
+        {
+            var serializedInstance = new Dictionary<string, string>();
+
+            foreach (var key in keys)
+            {
+                var p = instance!.GetType()!.GetProperty(key);
+                var value = p!.GetValue(instance);
+                if (value is null)
+                    continue;
+                string valueRepr = value.ToString() ?? "";
+                serializedInstance.Add(key, valueRepr);
+            }
+            return serializedInstance;
+        }
+ 
         public static Dictionary<string, string> InputTypeProperties(
             Type type,
-            ReadOnlyCollection<string> keyProperties)
+            List<string> keys)
         {
             Dictionary<string, string> inputData = new Dictionary<string, string>();
             PropertyInfo[] properties = type.GetProperties();
 
             foreach (var prop in properties)
             {
-                if (!keyProperties.Contains(prop.Name))
+                if (!keys.Contains(prop.Name))
                     continue;
+                Console.WriteLine(prop.Name + ": ");
                 inputData.Add(prop.Name, Console.ReadLine() ?? "");
             }
             return inputData;
@@ -56,10 +118,15 @@ namespace LNUCSharp.Task1
             do
             {
                 Console.WriteLine("Enter key you want to edit and its value, or exit to stop editing menu: ");
+
+				Console.WriteLine("Key: ");
                 key = Console.ReadLine() ?? "";
                 if (key == "exit")
                     break;
+
+				Console.WriteLine("Value: ");
                 value = Console.ReadLine() ?? "";
+
                 data.Add(key, value);
             }
             while (true);
@@ -67,6 +134,14 @@ namespace LNUCSharp.Task1
             return data;
         }
 
+        public static List<string> GetKeys(Type type)
+        {
+            var keys = type.GetProperty("Keys");
+            if (keys is null)
+                return new List<string>();
+            return (List<string>)keys.GetValue(null);
+        }
+       
         public static object GetPrimaryKey<TVal>(TVal? instance)
         {
             if (instance is null)
@@ -79,19 +154,6 @@ namespace LNUCSharp.Task1
             if (PK is null)
                 throw new NullReferenceException("The primary key of the instance was a null reference");
             return PK;
-        }
-
-        public static ReadOnlyCollection<string> GetKeyProperties(Type type)
-        {
-            PropertyInfo? prop = type.GetProperty("KeyProperties");
-
-            if (prop is null)
-                throw new MissingFieldException("Value type does not have a 'KeyProperties' constant field");
-            var keyProps = (ReadOnlyCollection<string>?)prop.GetValue(null);
-
-            if (keyProps is null)
-                throw new NullReferenceException("'KeyProperties' field was a null reference");
-            return keyProps;
-        }
+        } 
     }
 }

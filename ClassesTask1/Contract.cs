@@ -14,17 +14,7 @@ namespace LNUCSharp.Task1
         private DateOnly? _startDate;
         private DateOnly? _endDate;
         private Dictionary<string, string> _errors = new Dictionary<string, string>();
-        private static readonly ReadOnlyCollection<string> _keyProperties = new ReadOnlyCollection<string>(
-        new[] {
-            "ID",
-            "ContractorFirstName",
-            "ContractorLastName",
-            "ContractorEmail",
-            "ContractorPhoneNumber",
-            "ContractorIBAN",
-            "StartDate",
-            "EndDate"
-        });    
+            
 
         public Contract()
         {
@@ -50,50 +40,32 @@ namespace LNUCSharp.Task1
             this.EndDate = endDate;
         }
 
-        public Contract(Dictionary<string, string> data)
+        public static List<string> Keys
         {
-            this.ParseData(data);
-        }
-
-        public void ParseData(Dictionary<string, string> data, bool partialEdit = false)
-        {
-            foreach (string propName in KeyProperties)
+            get
             {
-                PropertyInfo? p = this.GetType().GetProperty(propName);
-
-                if (p == null)
-                    continue;
-
-                string? inputData;
-                Type type = p.PropertyType; 
-                data.TryGetValue(p.Name, out inputData);
-
-                if (inputData == null)
-                {
-                    if (!partialEdit)
-                        this._errors.Add(
-                            p.Name,
-                            "Read error. No data provided for the field");
-                    continue;
-                }
-
-                object? parsedData = Helpers.ParseFromString(type, inputData);
-                
-                if (parsedData == null)
-                {
-                    this._errors.Add(
-                        p.Name,
-                        String.Format(
-                            "Parsing error. Input string does not respresent a {0} type", 
-                            p.PropertyType.ToString()));
-                    continue;
-                }
-               
-                p.SetValue(
-                    this, 
-                    parsedData);
+                return new List<string>(new[] {
+					"ID",
+					"ContractorFirstName",
+					"ContractorLastName",
+					"ContractorEmail",
+					"ContractorPhoneNumber",
+					"ContractorIBAN",
+					"StartDate",
+					"EndDate"
+				});
             }
         }
+		
+		public void AddError(string fieldName, string message)
+		{
+			this._errors.Add(fieldName, message);
+		}
+
+		public Dictionary<string, string> Errors
+		{
+			get => _errors;
+		}
 
         public int? ID 
         {
@@ -228,32 +200,15 @@ namespace LNUCSharp.Task1
             set
             {
                 this._endDate = value;
+                if (this._endDate < this._startDate)
+                {
+                    this._endDate = null;
+                    this._errors.Add(
+                        "EndDate",
+                        "End date can not be earlier than start date"
+                    );
+                }
             }
-        }
-
-        public static ReadOnlyCollection<string> KeyProperties
-        {
-            get => _keyProperties;
-        }
-
-        private bool ValidateLogic()
-        {
-            if (this.StartDate == null && this.EndDate == null)
-                return false;
-            if (this.StartDate > this.EndDate)
-            {
-                this._errors.Add(
-                    "StartDate",
-                    "Start date can not be earlier than end date");
-                return false;
-            }
-            return true;
-        }
-
-        public Dictionary<string, string> GetErrors()
-        {
-            this.ValidateLogic();
-            return this._errors;
         }
 
         public override string ToString()
@@ -261,26 +216,13 @@ namespace LNUCSharp.Task1
             string repr = "";
             foreach (PropertyInfo prop in this.GetType().GetProperties())
             {
+				if (!Contract.Keys.Contains(prop.Name))
+					continue;
                 repr += prop.Name + ": " + Convert.ToString(prop.GetValue(this, null));
                 repr += "\n";
             }
             return repr;
         }
 
-        public Dictionary<string, string> ToDictionary()
-        {
-            var serializedInstance = new Dictionary<string, string>();
-
-            foreach (var pName in KeyProperties)
-            {
-                var p = this.GetType().GetProperty(pName);
-                var value = p!.GetValue(this);
-                if (value is null)
-                    continue;
-                string valueRepr = value.ToString() ?? "";
-                serializedInstance.Add(pName, valueRepr);
-            }
-            return serializedInstance;
-        }
-    }
+   }
 }

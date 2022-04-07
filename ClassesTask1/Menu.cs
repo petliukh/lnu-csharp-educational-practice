@@ -85,12 +85,12 @@ namespace LNUCSharp.Task1
 
         public void ReportErrors()
         {
-            var getErrorsMethod = typeof(TVal).GetMethod("GetErrors");
-            if (getErrorsMethod == null)
+            var errorsProp = typeof(TVal).GetProperty("Errors");
+            if (errorsProp == null)
                 return;
             foreach (var entry in this.cont.Values)
             {
-                var errors = (Dictionary<string, string>?)getErrorsMethod.Invoke(entry, new object[] {});
+                var errors = (Dictionary<string, string>?)errorsProp.GetValue(entry);
                 if (errors == null)
                     continue;
                 Console.WriteLine(string.Join(Environment.NewLine, errors));
@@ -99,12 +99,10 @@ namespace LNUCSharp.Task1
 
         public void ShowEntries()
         {
-            string entries = string.Join(Environment.NewLine, this.cont);
-
             foreach (var entry in this.cont.Values)
             {
-                Console.WriteLine(string.Join(Environment.NewLine, entry));
-                Console.WriteLine("-\n-\n-\n");
+                Console.WriteLine(entry.ToString());
+                Console.WriteLine("\n\n");
             }
         }
 
@@ -120,14 +118,14 @@ namespace LNUCSharp.Task1
             Dictionary<string, MenuFuncDelegate> options = new Dictionary<string, MenuFuncDelegate>()
             {
                 {"help", this.Manual},
-                {"npt", this.InputNewEntry},
+                {"ipt", this.InputNewEntry},
                 {"rd", this.ReadEntriesFromFile},
-                {"dt", this.EditEntry},
+                {"edit", this.EditEntry},
                 {"wrt", this.UpdateEntriesInFile},
                 {"shw", this.ShowEntries},
-                {"srch", this.SearchInfo},
+                {"sch", this.SearchInfo},
                 {"srt", this.SortEntries},
-                {"rprt", this.ReportErrors}
+                {"rpt", this.ReportErrors}
             };
             return options;
         }
@@ -136,14 +134,14 @@ namespace LNUCSharp.Task1
         {
             Dictionary<string, string> manual = new Dictionary<string, string>()
             {
-                {"npt", "Add new contract entry to the container inputting data manually with keyboard"},
+                {"ipt", "Add new contract entry to the container inputting data manually with keyboard"},
                 {"rd", "Add new contract entries to the container by parsing JSON file"},
-                {"dt", "Edit a contract entry specified by its ID"},
+                {"edit", "Edit a contract entry specified by its ID"},
                 {"wrt", "Write entries from the container to a file"},
                 {"shw", "Output all entries from the container to the console"},
-                {"srch", "Find search query occurences across all entries"},
+                {"sch", "Find search query occurences across all entries"},
                 {"srt", "Display all entries sorted by specified property"},
-                {"rprt", "Display all errors which occured while parsing input data"},
+                {"rpt", "Display all errors which occured while parsing input data"},
                 {"exit", "Exit the programm"}
             };
             return manual;
