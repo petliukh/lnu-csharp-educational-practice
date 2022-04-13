@@ -101,7 +101,7 @@ namespace LNUCSharp.Task1
         {
             foreach (var entry in this.cont.Values)
             {
-                Console.WriteLine(entry.ToString());
+                Console.WriteLine(entry!.ToString());
                 Console.WriteLine("\n\n");
             }
         }
