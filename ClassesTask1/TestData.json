@@ -1,0 +1,32 @@
+[
+   {
+      "ID": "1",
+      "ContractorFirstName": "vitalii",
+      "ContractorLastName": "Prtliukh123",
+      "ContractorEmail": "vitalii.petliuk.houtlook.com",
+      "ContractorPhoneNumber": "380975909635",
+      "ContractorIBAN": "3223 1300 0002 6007 2335 6600 1",
+      "StartDate": "2020-02-20",
+      "EndDate": "2019-02-22"
+   },
+   {
+      "ID": "2",
+      "ContractorFirstName": "Volodymyr",
+      "ContractorLastName": "Zvarun",
+      "ContractorEmail": "volodymyr.zvarun@outlook.com",
+      "ContractorPhoneNumber": "+380975909635",
+      "ContractorIBAN": "UA19 3223 1300 0002 6007 2335 6600 1",
+      "StartDate": "2013-02-20",
+      "EndDate": "2021-02-22"
+   },
+   {
+      "ID": "3",
+      "ContractorFirstName": "Vitalii",
+      "ContractorLastName": "Khomyn",
+      "ContractorEmail": "vitalii.khomyn@outlook.com",
+      "ContractorPhoneNumber": "+380975909635",
+      "ContractorIBAN": "UA19 3223 1300 0002 6007 2335 6600 1",
+      "StartDate": "2013-02-20",
+      "EndDate": "2021-02-22"
+   }
+]
