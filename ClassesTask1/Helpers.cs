@@ -139,7 +139,7 @@ namespace LNUCSharp.Task1
             var keys = type.GetProperty("Keys");
             if (keys is null)
                 return new List<string>();
-            return (List<string>)keys.GetValue(null);
+            return (List<string>)keys.GetValue(null)!;
         }
        
         public static object GetPrimaryKey<TVal>(TVal? instance)
