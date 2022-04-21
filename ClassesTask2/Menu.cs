@@ -399,6 +399,10 @@ namespace LNUCSharp.Task2
                 {
                     RegisterUser();
                 }
+                if (command == "help")
+                {
+                    Manual();
+                }
                 else if (menuFunc != null)
                 {
                     if (currentlyLoggedInUser == null)
