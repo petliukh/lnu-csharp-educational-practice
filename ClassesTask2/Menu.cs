@@ -338,7 +338,7 @@ namespace LNUCSharp.Task2
                 {"login", LoginUser},
                 {"shwusr", ShowCurrentlyLoggedInUser},
                 {"shwpvd", ShowApprovedEntries},
-                {"shwown", ShowOwnEntries},
+                {"shwmy", ShowOwnEntries},
                 {"shwdft", ShowDraftEntries},
                 {"review", ReviewEntries},
                 {"ipt", InputNewEntry},
