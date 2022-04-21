@@ -54,6 +54,7 @@ namespace LNUCSharp.Task2
             }
 
             string content = JsonSerializer.Serialize(dictList);
+            var options = new JsonSerializerOptions() { WriteIndented = true };
             File.WriteAllText(filePath, content);
         }
 

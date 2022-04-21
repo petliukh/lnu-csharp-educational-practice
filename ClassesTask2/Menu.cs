@@ -256,6 +256,15 @@ namespace LNUCSharp.Task2
         public void UpdateEntriesInFile()
         {
             Console.WriteLine("Enter file path to write to: ");
+            var approvedEntries = new ModelContainer<TKey, TVal>();
+            foreach (var entry in _entries)
+            {
+                if (entry.status == Status.Approved)
+                {
+                    TKey key = (TKey)entry.model.GetPrimaryKey();
+                    approvedEntries.Add(key, entry.model);
+                }
+            }
             models.WriteToFile(Console.ReadLine() ?? "");
         }
 
@@ -385,6 +394,10 @@ namespace LNUCSharp.Task2
                 if (command == "login")
                 {
                     LoginUser();
+                }
+                if (command == "register")
+                {
+                    RegisterUser();
                 }
                 else if (menuFunc != null)
                 {
