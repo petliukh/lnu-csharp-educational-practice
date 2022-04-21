@@ -395,11 +395,11 @@ namespace LNUCSharp.Task2
                 {
                     LoginUser();
                 }
-                if (command == "register")
+                else if (command == "register")
                 {
                     RegisterUser();
                 }
-                if (command == "help")
+                else if (command == "help")
                 {
                     Manual();
                 }
