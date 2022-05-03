@@ -1,0 +1,20 @@
+[
+  {
+    "Email": "petl@g.com",
+    "Salt": "1736fcdbf446d60ff91e409219289da0",
+    "Password": "41f424021ce77d75463ae20f7c826f4a67996fb63c61477648db9e56166a1097",
+    "FirstName": "Vitalii",
+    "LastName": "Petliukh",
+    "UserRole": "Admin"
+  },
+  {
+    "Email": "jame@g.com",
+    "Salt": "297b9d4cbe368a0906e75a0d8e81c2a1",
+    "Password": "f7bd37da57e98b83db5082af6d766e4b8faa7e47bf670703b76c030ee7439cee",
+    "FirstName": "Jame",
+    "LastName": "Smith",
+    "UserRole": "Staff",
+    "Salary": "12000",
+    "FirstDayInCompany": "1/1/2020"
+  }
+]
